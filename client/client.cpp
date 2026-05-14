@@ -3,9 +3,20 @@
 #include <vector>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <intrin.h>
 #include "..\shared\crypto_utils.hpp"
 
 #pragma comment(lib, "ws2_32.lib")
+
+std::string get_hwid() {
+    char h[64] = {0};
+    DWORD v = 0;
+    GetVolumeInformationA("C:\\", nullptr, 0, &v, nullptr, nullptr, nullptr, 0);
+    int c[4] = {0};
+    __cpuid(c, 1);
+    sprintf_s(h, "%08X%08X%08X", v, c[0], c[3]);
+    return std::string(h);
+}
 
 #pragma pack(push, 1)
 struct auth_packet {
@@ -32,7 +43,7 @@ int main() {
 
     std::cout << "conn ok\n";
 
-    std::string hwid_str = "A1B2C3D4E5F6G7H8";
+    std::string hwid_str = get_hwid();
     std::string payload_str = "load module 0x1";
     
     std::vector<uint8_t> payload(payload_str.begin(), payload_str.end());
